@@ -3,25 +3,66 @@ package mk.ukim.finki.emt.usermanagement.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.*;
+import java.time.ZonedDateTime;
+import java.util.Random;
 
-@Entity
-@Table(name="users")
+
 public class User {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+    public Long id;
 
-    private String name;
+    public String name;
 
-    private String username;
+    public String username;
 
-    private String hashPassword;
+    public String hashPassword;
 
-    private String email;
+    public String email;
 
-    private Role role;
+    public Role role;
+
+    public boolean activated = false;
+
+    public ZonedDateTime dateCreated;
+
+    public ActivationCode activationCode;
+
+    public User() {
+
+    }
+
+    public User(String name, String username, String hashPassword, String email, Role role, ZonedDateTime dateCreated, String activationCode) {
+        this.name = name;
+        this.username = username;
+        this.hashPassword = hashPassword;
+        this.email = email;
+        this.role = role;
+        this.dateCreated = dateCreated;
+
+        dateCreated = ZonedDateTime.now();
 
 
+    }
+
+    /**
+     * Factory method
+     */
+
+    public User createUnconfirmedUser (String name, String username, String hashPassword, String email) {
+        User user = new User();
+        user.activated=false;
+        user.username=username;
+        user.name=name;
+        user.email=email;
+        user.dateCreated=ZonedDateTime.now();
+        user.role=Role.USER;
+        user.activationCode = ActivationCode.createActivationCodePerUser(user.dateCreated);
+        return user;
+
+    }
+
+    public boolean shouldBeDeleted() {
+        return activationCode.expirationDate.isBefore(ZonedDateTime.now());
+    }
 
 }
